@@ -1,0 +1,175 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+
+SaveManager:SetLibrary(Fluent)
+SaveManager:SetFolder("Pulse Hub")
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+local Window = Fluent:CreateWindow({
+    Title = "Pulse Hub",
+    SubTitle = "Cookie <:",
+    Theme = "Dark",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+})
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "home" }),
+    KeySystem = Window:AddTab({ Title = "Key System", Icon = "key" }),
+    Discord = Window:AddTab({ Title = "Discord", Icon = "message-circle" }),
+}
+
+local Options = Fluent.Options
+
+Tabs.Main:AddSection("Welcome")
+Tabs.Main:AddParagraph({
+    Title = "Welcome!",
+    Content = "Thanks for choosing Pulse Hub!\n\nTo get started:\n1. Join our Discord\n2. Get your key\n3. Enter your key in the Key System tab"
+})
+
+Tabs.Main:AddParagraph({
+    Title = "What we offer",
+    Content = "✓ Regular Updates\n✓ Easy to use"
+})
+
+local function setupKeySystem()
+    Tabs.KeySystem:AddSection("Key System")
+    Tabs.KeySystem:AddParagraph({
+        Title = "How to use",
+        Content = "Enter your key below and click Redeem. Need a key? Click 'Get Key'!"
+    })
+
+    Tabs.KeySystem:AddInput("KeyInput", {
+        Title = "Your Key",
+        Default = "",
+        Placeholder = "Paste your key here...",
+        Callback = function(Value)
+            script_key = Value
+        end
+    })
+
+    Tabs.KeySystem:AddSection("Buttons")
+
+    local function tryKey()
+        local keyToCheck = Options.KeyInput and Options.KeyInput.Value
+        if keyToCheck and keyToCheck ~= "" then
+            script_key = keyToCheck
+            SaveManager:Save("default")
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/f54d1815663e1da8e35b596b3f7a190e.lua"))()
+            Fluent:Destroy()
+            script:Destroy()
+        else
+            Fluent:Notify({
+                Title = "Oops!",
+                Content = "Please enter a key first!",
+                Duration = 5,
+                Image = "x"
+            })
+        end
+    end
+
+    Tabs.KeySystem:AddButton({
+        Title = "Redeem Key",
+        Description = "Click to use your key",
+        Callback = tryKey
+    })
+
+    Tabs.KeySystem:AddButton({
+        Title = "Get Key",
+        Description = "Click to get a new key",
+        Callback = function()
+            setclipboard("https://ads.luarmor.net/get_key?for=Pulse_Hub_Key_System-GgFhoIBqlSOb")
+            Fluent:Notify({
+                Title = "Link Copied!",
+                Content = "Open the link in your browser to get your key",
+                Duration = 5,
+                Image = "check"
+            })
+        end
+    })
+
+    Tabs.KeySystem:AddButton({
+        Title = "Clear Key",
+        Callback = function()
+            Options.KeyInput:SetValue("")
+            SaveManager:Save("default")
+            Fluent:Notify({
+                Title = "Done!",
+                Content = "Saved key cleared",
+                Duration = 5,
+                Image = "check"
+            })
+        end
+    })
+end
+
+local function setupDiscord()
+    Tabs.Discord:AddSection("Our Discord")
+    Tabs.Discord:AddParagraph({
+        Title = "Join us!",
+        Content = "Join our Discord for: Updates, Community chat, Exclusive stuff"
+    })
+
+    Tabs.Discord:AddButton({
+        Title = "Join Discord",
+        Callback = function()
+            setclipboard("https://discord.gg/5UPBtm7KW6")
+            Fluent:Notify({
+                Title = "Copied!",
+                Content = "Paste the link in your browser to join",
+                Duration = 5,
+                Image = "check"
+            })
+        end
+    })
+
+    Tabs.Discord:AddSection("Need Help?")
+    
+    Tabs.Discord:AddParagraph({
+        Title = "How to get help",
+        Content = "1. Ask staff"
+    })
+end
+
+setupKeySystem()
+setupDiscord()
+
+task.spawn(function()
+    wait(1)
+    SaveManager:Load("default")
+    wait(0.1)
+
+    local savedKey = Options.KeyInput and Options.KeyInput.Value
+    if savedKey and savedKey ~= "" then
+        Window:Dialog({
+            Title = "Found Saved Key",
+            Content = "Want to use your saved key?",
+            Buttons = {
+                {
+                    Title = "Yes",
+                    Callback = function()
+                        script_key = savedKey
+                        loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/f54d1815663e1da8e35b596b3f7a190e.lua"))()
+                        Fluent:Destroy()
+                        script:Destroy()
+                    end
+                },
+                {
+                    Title = "No",
+                    Callback = function()
+                        Options.KeyInput:SetValue("")
+                        SaveManager:Save("default")
+                    end
+                }
+            }
+        })
+    end
+end)
+
+Fluent:Notify({
+    Title = "Welcome!",
+    Content = "Enter your key to start using Pulse Hub",
+    Duration = 8
+})
